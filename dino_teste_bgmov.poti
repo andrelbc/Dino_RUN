@@ -1,0 +1,142 @@
+
+use "jerimum"
+
+tipo Obstaculo
+t=aleatorio(1, 3)
+var imagem = [Imagem("galho.png"), Imagem("pedra.png"), Imagem("buraco.png")]
+var x = aleatorio(1702, 2200)
+  desenhe()
+  imagem[t].desenhe(x, 750-imagem[t].altura, 3)
+  fim
+fim
+
+var fundo = Imagem("bg_solo.png")
+var fundo_002 = Imagem("bg_fundo.png")
+var dino_down = Imagem("dino_down.png").fatie(159, 86)
+var dino_up = Imagem("dino_run_002.png").fatie(114, 123)
+var dino_run = dino_up
+var bg_x=0
+var bg_x_002=0
+var dino_y=620
+var vel = 0.0
+var cont:=1.0
+var sentido:=1
+var obstaculos = [Obstaculo()]
+var gameover = falso
+var morto = Imagem("dead.png")
+
+
+mover_direita()
+  sentido:=1
+  bg_x:=bg_x-8
+  bg_x_002:=bg_x_002-2
+  cont:=cont+0.15
+  para obs em obstaculos faça
+  obs.x := obs.x-8
+  fim
+fim
+mover_esquerda()
+  sentido:=-1
+  bg_x:=bg_x+8
+  bg_x_002:=bg_x_002+2
+  cont:=cont+0.15
+  para obs em obstaculos faça
+  obs.x := obs.x+8
+  fim
+fim
+
+
+atualize()
+se não gameover então
+  se não Teclado.TECLA_X então
+    dino_run:=dino_up
+    se Teclado.TECLA_PARA_DIREITA então
+      mover_direita
+      se cont == 1.0 então
+        cont:= 2.0
+     fim
+     se cont >= 4 então
+       cont:=2.0
+     fim
+   fim
+    se Teclado.TECLA_PARA_ESQUERDA então
+      mover_esquerda
+      se cont == 1.0 então
+        cont:= 2.0
+      fim
+      se cont >= 4 então
+        cont:=2.0
+      fim
+    fim
+  senãose Teclado.TECLA_X então
+    dino_run:=dino_down
+    se Teclado.TECLA_PARA_DIREITA então
+      mover_direita
+      se cont >= 3 então
+        cont:=1.0
+      fim
+    fim
+    se Teclado.TECLA_PARA_ESQUERDA então
+      mover_esquerda
+      se cont >= 3 então
+        cont:=1.0
+      fim
+    fim
+  fim
+
+  obstaculos:=obstaculos.selecione(_.x > -200)
+
+  se obstaculos.tamanho < 1 então
+    obstaculos:=obstaculos+[Obstaculo()]
+  fim
+
+
+  se Teclado.TECLA_ESPACO e dino_y == 620 então
+    dino_y:=619
+    vel:= -20.0
+    cont:=1.0
+  fim
+  se dino_y < 620 então
+    vel:=vel+1
+    dino_y:=dino_y + vel.inteiro
+    cont:=1.0
+  senao
+    dino_y:=620
+  fim
+  se não Teclado.TECLA_PARA_ESQUERDA e não Teclado.TECLA_PARA_DIREITA então
+    cont:=1.0
+  fim
+
+  se bg_x <= -fundo.largura então
+    bg_x:=bg_x + fundo.largura
+  fim
+  se bg_x_002 <= -fundo_002.largura então
+    bg_x_002:=bg_x_002 + fundo_002.largura
+  fim
+
+  para obs em obstaculos faça
+    se obs.x < 530 + dino_run[cont.inteiro].largura e obs.x > 680 - obs.imagem[obs.t].largura e dino_y > (650 - dino_run[cont.inteiro].altura) então
+      gameover:=verdadeiro
+    fim
+
+  fim
+
+fim
+fim
+
+
+desenhe()
+para obs em obstaculos faça
+  obs.desenhe
+fim
+se gameover == verdadeiro então
+  morto.desenhe(600, 300, 4)
+fim
+  fundo_002.desenhe(bg_x_002, 0, 0)
+  fundo_002.desenhe(bg_x_002 + 1998, 0, 0)
+  fundo.desenhe(bg_x, 647, 1)
+  fundo.desenhe(bg_x + fundo.largura, 647, 1)
+  dino_run[cont.inteiro].desenhe(600, dino_y+123 - dino_run[cont.inteiro].altura, 2, 0, sentido)
+fim
+
+jogo.iniciar("Dino RUN", 1701, 947, atualize, desenhe)
